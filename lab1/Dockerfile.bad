@@ -1,0 +1,20 @@
+# Плохой Dockerfile: минимум 3 bad practice
+
+# 1)Тег latest непредсказуем, сборка может сломаться при обновлении образа.
+# ubuntu содержит много других зависимостей
+FROM ubuntu:latest
+
+# 2) Много лишних пакетов
+RUN apt-get update
+RUN apt-get install -y python3 python3-pip git vim nano
+
+# 3) Копируем весь контекст (включая .git, секреты и т.д.)
+COPY . /app
+
+# 4) pip без requirements и без фиксированных версий
+RUN pip3 install flask
+
+EXPOSE 8000
+
+# Запуск от root
+CMD ["python3", "app/app.py"]

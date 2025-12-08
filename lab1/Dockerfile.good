@@ -1,0 +1,28 @@
+# Хороший Dockerfile: исправляем bad practice
+
+# 1) Берём конкретную версию и в принципе легкую базу
+FROM python:3.11-slim
+
+# 2) Создаём отдельного пользователя
+RUN useradd -m appuser
+
+WORKDIR /app
+
+# 3) Сначала копируем только зависимости, чтобы кешировалось
+COPY app/requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Теперь код модуля
+COPY app/ .
+
+# Каталог для данных
+ENV APP_DATA_DIR=/data
+VOLUME ["/data"]
+
+# Запуск от имени пользователя
+USER appuser
+
+EXPOSE 8000
+
+CMD ["python", "app.py"]
