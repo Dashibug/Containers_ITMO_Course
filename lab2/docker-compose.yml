@@ -1,0 +1,66 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: lab2_db
+    env_file: .env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - lab2_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  init:
+    build:
+      context: ..
+      dockerfile: lab1/Dockerfile.good
+    image: lab2_app:1.0
+    container_name: lab2_init
+    env_file: .env
+    networks:
+      - lab2_net
+    volumes:
+      - app_data:/data
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["python", "init_db.py"]
+
+  app:
+    build:
+      context: ..
+      dockerfile: lab1/Dockerfile.good
+    image: lab2_app:1.0
+    container_name: lab2_app
+    env_file: .env
+    networks:
+      - lab2_net
+    volumes:
+      - app_data:/data
+    ports:
+      - "${APP_PORT}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import socket; s=socket.create_connection((\"127.0.0.1\",8000),2); s.close()'"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+volumes:
+  pg_data:
+  app_data:
+
+networks:
+  lab2_net:
+    driver: bridge
