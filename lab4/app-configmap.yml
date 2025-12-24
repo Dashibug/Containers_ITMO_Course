@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lab4-db-config
+  labels:
+    app: lab4
+    component: db
+data:
+  POSTGRES_DB: "appdb"

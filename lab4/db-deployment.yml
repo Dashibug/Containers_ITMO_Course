@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lab4-postgres
+  labels:
+    app: lab4
+    component: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lab4
+      component: db
+  template:
+    metadata:
+      labels:
+        app: lab4
+        component: db
+    spec:
+      volumes:
+        - name: pg-data
+          emptyDir: {}
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: lab4-db-config
+            - secretRef:
+                name: lab4-db-secret
+          volumeMounts:
+            - name: pg-data
+              mountPath: /var/lib/postgresql/data

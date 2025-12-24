@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lab4-app-config
+  labels:
+    app: lab4
+    component: app
+data:
+  APP_PORT: "8000"
+  APP_GREETING: "Hello from Lab4 on Kubernetes"
